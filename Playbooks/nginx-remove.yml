@@ -1,0 +1,12 @@
+---
+- hosts: development_hosts
+  become: yes
+  tasks:
+    - name: Remove Nginx
+      apt:
+        name: nginx
+        state: absent
+
+    - name: Autoclean
+      apt:
+        autoremove: yes 
