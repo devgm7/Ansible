@@ -19,6 +19,14 @@
         state: directory
         mode: 0755
 
+    - name: configuring kubectl on Control-Plane Node
+      become: yes
+      become_user: kube
+      shell: | 
+        mkdir -p $HOME/.kube \
+        && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config \
+        && sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
     - name: install Pod network
       become: yes
       become_user: kube
