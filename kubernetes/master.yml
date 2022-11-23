@@ -7,10 +7,9 @@
       shell: "swapoff -a"
 
     - name: initialize the cluster
-      shell: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
 
     - name: create .kube directory
-      become: yes
       file:
         path: $HOME/.kube
         state: directory
@@ -24,5 +23,4 @@
         owner: kube
 
     - name: install Pod network
-      become: yes
       shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
