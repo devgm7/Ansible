@@ -1,0 +1,13 @@
+---
+- hosts: masters, workers
+  become: yes
+  tasks:
+    - name: Update cache
+      apt:
+        update_cache: yes
+    - name: Install neofetch
+      apt:
+        name: neofetch
+    - name: Run neofetch
+      shell: |
+        neofetch

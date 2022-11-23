@@ -1,0 +1,28 @@
+---
+- hosts: master
+  become: yes
+  tasks:
+    - name: remove swap
+      shell: "swapoff -a"
+
+    - name: initialize the cluster
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all>> cluster_initialized.txt
+      args:
+        chdir: $HOME
+        creates: cluster_initialized.txt
+
+    - name: create .kube directory
+      become: yes
+      become_user: kube
+      file:
+        path: $HOME/.kube
+        state: directory
+        mode: 0755
+
+    - name: install Pod network
+      become: yes
+      become_user: kube
+      shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml >> pod_network_setup.txt
+      args:
+        chdir: $HOME
+        creates: pod_network_setup.txt
