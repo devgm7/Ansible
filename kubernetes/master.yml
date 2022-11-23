@@ -8,7 +8,7 @@
     - name: initialize the cluster
       become: yes
       become_user: kube
-      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
+      shell: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
 
     # - name: create .kube directory
     #   become: yes
