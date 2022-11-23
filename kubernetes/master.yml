@@ -7,6 +7,7 @@
 
     - name: initialize the cluster
       become: yes
+      become_user: kube
       shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
 
     # - name: create .kube directory
@@ -28,7 +29,11 @@
 
     - name: export kube config
       become: yes
-      shell: KUBECONFIG=/etc/kubernetes/admin.conf
+      become_user: kube
+      shell: |
+          mkdir -p $HOME/.kube \
+          && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config \
+          && sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
     - name: install Pod network
       shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
