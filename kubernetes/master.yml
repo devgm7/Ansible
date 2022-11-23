@@ -6,7 +6,7 @@
       shell: "swapoff -a"
 
     - name: initialize the cluster
-      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all>> cluster_initialized.txt
+      shell: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all >> cluster_initialized.txt
       args:
         chdir: $HOME
         creates: cluster_initialized.txt
@@ -18,13 +18,13 @@
         path: $HOME/.kube
         state: directory
         mode: 0755
-
-    - name: configuring kubectl on Control-Plane Node
-      become: yes
-      become_user: kube
-      shell: |
-        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config \
-        && sudo chown $(id -u):$(id -g) $HOME/.kube/config
+  
+    - name: copy admin.conf to user's kube config
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/kube/.kube/config
+        remote_src: yes
+        owner: kube
 
     - name: install Pod network
       become: yes
