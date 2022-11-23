@@ -1,7 +1,8 @@
 ---
 - hosts: master
+  become: yes
   tasks:
-    - name: Getting Nodes
+  
+    - name: check kubernetes cluster
       become_user: kube
       shell: kubectl get nodes
-
