@@ -1,7 +1,7 @@
 ---
 - hosts: master
-  become_user: kube
   tasks:
     - name: Getting Nodes
+      become_user: kube
       shell: kubectl get nodes
 
