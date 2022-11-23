@@ -6,34 +6,22 @@
       shell: "swapoff -a"
 
     - name: initialize the cluster
-      become: yes
-      become_user: kube
       shell: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
 
-    # - name: create .kube directory
-    #   become: yes
-    #   become_user: kube
-    #   file:
-    #     path: $HOME/.kube
-    #     state: directory
-    #     mode: 0755
-
-    # - name: copy admin.conf to user's kube config
-    #   become: yes
-    #   become_user: kube
-    #   copy:
-    #     src: /etc/kubernetes/admin.conf
-    #     dest: /home/kube/.kube/config
-    #     remote_src: yes
-    #     owner: kube
-
-    - name: export kube config
+    - name: create .kube directory
       become: yes
       become_user: kube
-      shell: |
-          mkdir -p $HOME/.kube \
-          && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config \
-          && sudo chown $(id -u):$(id -g) $HOME/.kube/config
+      file:
+        path: $HOME/.kube
+        state: directory
+        mode: 0755
+
+    - name: copy admin.conf to user's kube config
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/kube/.kube/config
+        remote_src: yes
+        owner: kube
 
     - name: install Pod network
       shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
