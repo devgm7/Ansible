@@ -11,3 +11,4 @@
     - name: Run neofetch
       shell: |
         neofetch
+        
