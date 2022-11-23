@@ -9,7 +9,6 @@
       shell: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
 
     - name: create .kube directory
-      become: yes
       become_user: kube
       file:
         path: $HOME/.kube
@@ -24,6 +23,5 @@
         owner: kube
 
     - name: install Pod network
-      become: yes
       become_user: kube
       shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
