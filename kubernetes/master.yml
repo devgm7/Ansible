@@ -13,7 +13,6 @@
       file:
         path: $HOME/.kube
         state: directory
-        mode: 0755
 
     - name: copy admin.conf to user's kube config
       copy:
@@ -21,6 +20,10 @@
         dest: /home/kube/.kube/config
         remote_src: yes
         owner: kube
+
+    - name: chown $HOME/.kube/config
+      become_user: kube
+      shell: sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
     - name: install Pod network
       become_user: kube
