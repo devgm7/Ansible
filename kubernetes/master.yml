@@ -1,24 +1,21 @@
 ---
 - hosts: master
+  become: yes
+  become_user: kube
   tasks:
     - name: remove swap
-      become: yes
       shell: "swapoff -a"
 
     - name: initialize the cluster
-      become: yes
       shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
 
     - name: create .kube directory
-      become: yes
       shell: mkdir -p $HOME/.kube
 
     - name: create .kube directory
-      become: yes
       shell: cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 
     - name: create .kube directory
-      become: yes
       shell: chown $(id -u):$(id -g) $HOME/.kube/config
 
     - name: install Pod network
