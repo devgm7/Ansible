@@ -1,7 +1,7 @@
 # Kubernetes [kubeadm] using Ansible
 Step 1
 
-Create 4 instances
+Create 4 instances with Ubuntu 18.04 OS.
 
 Step 2 (On ansible host as Ubuntu user)
 

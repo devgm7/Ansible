@@ -1,0 +1,9 @@
+[masters]
+ master ansible_host=[private_ip] ansible_user=kube
+ 
+[workers]
+ worker1 ansible_host=[private_ip] ansible_user=kube
+ worker2 ansible_host=[private_ip] ansible_user=kube
+ 
+[all:vars]
+ ansible_python_interpreter=/usr/bin/python3
