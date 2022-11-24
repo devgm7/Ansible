@@ -9,14 +9,12 @@
       shell: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
 
     - name: create .kube directory
-      become: yes
       file:
         path: $HOME/.kube
         state: directory
         mode: 0755
 
     - name: copy admin.conf to user's kube config
-      become: yes
       copy:
         src: /etc/kubernetes/admin.conf
         dest: /home/kube/.kube/config
