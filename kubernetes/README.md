@@ -3,6 +3,22 @@ Step 1
 
 Create 4 instances with Ubuntu 18.04 OS.
 
+```text-plain
+sudo hostnamectl set-hostname ansible
+```
+
+```text-plain
+sudo hostnamectl set-hostname master
+```
+
+```text-plain
+sudo hostnamectl set-hostname worker1
+```
+
+```text-plain
+sudo hostnamectl set-hostname worker2
+```
+
 Step 2 (On ansible host as Ubuntu user)
 
 ```text-plain
@@ -22,7 +38,7 @@ Step 4
 ssh-keygen
 ```
 
-Step 5
+Step 5 (or GitHub clone)
 
 ```text-plain
 mkdir ~/kube-cluster
@@ -30,28 +46,36 @@ cd ~/kube-cluster
 ```
 
 ```text-plain
-nano inventory
+nano inventory-ubuntu
 ```
 
-inventory
+inventory-ubuntu
 
 ```text-plain
 [masters]
- master ansible_host=172.31.44.221 ansible_user=ubuntu
+ master ansible_host=[private_ip] ansible_user=ubuntu
  
 [workers]
- worker1 ansible_host=172.31.40.138 ansible_user=ubuntu
- worker2 ansible_host=172.31.42.224 ansible_user=ubuntu
+ worker1 ansible_host=[private_ip] ansible_user=ubuntu
+ worker2 ansible_host=[private_ip] ansible_user=ubuntu
  
 [all:vars]
  ansible_python_interpreter=/usr/bin/python3
- ansible_ssh_private_key_file=~/kube-cluster/secrets/key.pem
+ ansible_ssh_private_key_file=secrets/key.pem
 ```
 
-Copy key.pem from local to ~/kube-cluster/secrets/
+```text-plain
+nano secrets/key.pem
+```
+
+Copy the content in key.pem from local.
 
 ```text-plain
-ansible all -i inventory -m ping
+chmod 400 secrets/key.pem
+```
+
+```text-plain
+ansible all -i inventory-ubuntu -m ping
 ```
 
 Step 6
@@ -67,26 +91,44 @@ initial.yml
 - hosts: all
   become: yes
   tasks:
-    - name: create the 'ubuntu' user
-      user: name=ubuntu append=yes state=present createhome=yes shell=/bin/bash
+    - name: create the 'kube' user
+      user: name=kube append=yes state=present createhome=yes shell=/bin/bash
  
-    - name: allow 'ubuntu' to have passwordless sudo
+    - name: allow 'kube' to have passwordless sudo
       lineinfile:
         dest: /etc/sudoers
-        line: 'ubuntu ALL=(ALL) NOPASSWD: ALL'
+        line: 'kube ALL=(ALL) NOPASSWD: ALL'
         validate: 'visudo -cf %s'
   
-    - name: set up authorized keys for the ubuntu user
-      authorized_key: user=ubuntu key="{{item}}"
+    - name: set up authorized keys for the kube user
+      authorized_key: user=kube key="{{item}}"
       with_file:
         - ~/.ssh/id_rsa.pub
 ```
 
 ```text-plain
-ansible-playbook -i inventory initial.yml
+ansible-playbook -i inventory-ubuntu initial.yml
 ```
 
 Step 7
+
+```text-plain
+nano inventory-kube
+```
+
+inventory-kube
+
+```text-plain
+[masters]
+ master ansible_host=[private_ip] ansible_user=kube
+ 
+[workers]
+ worker1 ansible_host=[private_ip] ansible_user=kube
+ worker2 ansible_host=[private_ip] ansible_user=kube
+ 
+[all:vars]
+ ansible_python_interpreter=/usr/bin/python3
+```
 
 ```text-plain
 nano ~/kube-cluster/kube-dependencies.yml
@@ -142,7 +184,7 @@ kube-dependencies.yml
 ```
 
 ```text-plain
-ansible-playbook -i inventory kube-dependencies.yml
+ansible-playbook -i inventory-kube kube-dependencies.yml
 ```
 
 Step 8
@@ -156,22 +198,25 @@ master.yml
 ```text-plain
 ---
 - hosts: master
-  become: yes
   tasks:
     - name: remove swap
+      become: yes
       shell: "swapoff -a"
 
     - name: initialize the cluster
-      shell: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
+      become: yes
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
 
     - name: create .kube directory
+      become: yes
       become_user: kube
       file:
         path: $HOME/.kube
         state: directory
         mode: 0755
-
+  
     - name: copy admin.conf to user's kube config
+      become: yes
       copy:
         src: /etc/kubernetes/admin.conf
         dest: /home/kube/.kube/config
@@ -179,12 +224,13 @@ master.yml
         owner: kube
 
     - name: install Pod network
+      become: yes
       become_user: kube
       shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 ```
 
 ```text-plain
-ansible-playbook -i inventory master.yml
+ansible-playbook -i inventory-kube master.yml
 ```
 
 Step 9
@@ -224,11 +270,11 @@ workers.yml
 ```
 
 ```text-plain
-ansible-playbook -i inventory workers.yml
+ansible-playbook -i inventory-kube workers.yml
 ```
 
 Step 10
 
 ```text-plain
-ansible master -i inventory -a "kubectl get nodes" --become --become-user kube
+ansible master -i inventory-kube -a "kubectl get nodes"
 ```
