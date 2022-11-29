@@ -42,6 +42,7 @@ Step 5 (or GitHub clone)
 
 ```text-plain
 mkdir ~/kube-cluster
+mkdir ~/kube-cluster/secrets
 cd ~/kube-cluster
 ```
 
@@ -88,7 +89,8 @@ initial.yml
 
 ```text-plain
 ---
-- hosts: all
+- hosts: allansible all -i inventory-ubuntu -m ping
+
   become: yes
   tasks:
     - name: create the 'kube' user
