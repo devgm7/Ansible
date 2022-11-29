@@ -7,7 +7,7 @@
 
     - name: initialize the cluster
       become: yes
-      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all
+      shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
 
     - name: create .kube directory
       become: yes
@@ -28,4 +28,4 @@
     - name: install Pod network
       become: yes
       become_user: kube
-      shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+      shell: kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.2/manifests/calico.yaml
